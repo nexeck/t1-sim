@@ -58,17 +58,20 @@ with open('positions.csv', newline='') as csvfile:
 
     for row in reader:
         currentDate = date.fromisoformat(row['Start'])
-        transactions.append(createTransaction(
-            item=row, value=row['Initial'], pointInTime=currentDate))
 
-        while (currentDate < date.today()):
-            print(currentDate.isoformat(), row['ISIN'])
+        if (float(row['Initial']) > 0):
             transactions.append(createTransaction(
-                item=row, value=row['Rate'], pointInTime=currentDate))
+                item=row, value=row['Initial'], pointInTime=currentDate))
 
-            daysInMonth = calendar.monthrange(
-                currentDate.year, currentDate.month)[1]
-            currentDate = currentDate + timedelta(days=daysInMonth)
+        if (float(row['Rate']) > 0):
+            while (currentDate < date.today()):
+                print(currentDate.isoformat(), row['ISIN'])
+                transactions.append(createTransaction(
+                    item=row, value=row['Rate'], pointInTime=currentDate))
+
+                daysInMonth = calendar.monthrange(
+                    currentDate.year, currentDate.month)[1]
+                currentDate = currentDate + timedelta(days=daysInMonth)
 
 with open('transactions.csv', 'w', encoding='utf-8', newline='\n') as transactionFile:
     fieldnames = [
