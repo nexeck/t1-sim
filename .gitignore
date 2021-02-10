@@ -1,2 +1,2 @@
-positions.csv
-transactions.csv
+*.csv
+!positions_template.csv
