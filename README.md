@@ -7,7 +7,7 @@
 
 ## Run
 
-Add positions into positions.csv
+Add positions into positions.csv (use positions_template.csv)
 
 ```sh
 API_TOKEN=<token> make run
