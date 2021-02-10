@@ -6,6 +6,7 @@ import calendar
 from datetime import date, timedelta
 import urllib.request
 import locale
+import time
 
 locale.setlocale(locale.LC_ALL, 'de_DE')
 
@@ -35,7 +36,7 @@ def createTransaction(item, value, pointInTime):
 
     tresorAPIUrl = 'https://api.tresor.one/v1/quotes/' + \
         pointInTime.isoformat() + '?isin=' + \
-        item['ISIN'] + '&exchange=xetra'
+        item['ISIN'] + '&exchange=' + item['Market']
 
     req = urllib.request.Request(tresorAPIUrl)
     req.add_header('authorization',
@@ -68,6 +69,7 @@ with open('positions.csv', newline='') as csvfile:
                 print(currentDate.isoformat(), row['ISIN'])
                 transactions.append(createTransaction(
                     item=row, value=row['Rate'], pointInTime=currentDate))
+                time.sleep(0.5)
 
                 daysInMonth = calendar.monthrange(
                     currentDate.year, currentDate.month)[1]
