@@ -26,4 +26,4 @@ update:
 	@pipenv update
 
 run:	## Run App
-	@pipenv run python src/generate.py
+	@pipenv run python src/generate.py -p $(POSITIONS_FILE) -t $(TRANSACTIONS_FILE) -i $(INITIAL_INVEST) -m $(MONTHLY_INVEST)

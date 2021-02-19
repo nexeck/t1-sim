@@ -1,12 +1,16 @@
 import csv
+import json
 import copy
 import os
-import json
 import calendar
 from datetime import date, timedelta
 import urllib.request
 import locale
 import time
+import math
+
+import sys
+import getopt
 
 locale.setlocale(locale.LC_ALL, 'de_DE')
 
@@ -54,46 +58,83 @@ def createTransaction(item, value, pointInTime):
     return newTransaction
 
 
-with open('positions.csv', newline='') as csvfile:
-    reader = csv.DictReader(csvfile)
+def generateTransactions(positionsFileName, transactionsFileName, initialInvest, monthlyInvest):
+    with open(positionsFileName, newline='') as csvfile:
+        reader = csv.DictReader(csvfile)
 
-    for row in reader:
-        currentDate = date.fromisoformat(row['Start'])
+        for row in reader:
+            currentDate = date.fromisoformat(row['Start'])
 
-        if (float(row['Initial']) > 0):
-            transactions.append(createTransaction(
-                item=row, value=row['Initial'], pointInTime=currentDate))
-
-        if (float(row['Rate']) > 0):
-            while (currentDate < date.today()):
-                print(currentDate.isoformat(), row['ISIN'])
+            initialQuote = float(row['InitialQuota'])
+            if (initialInvest > 0 and initialQuote > 0):
+                initialValue = math.ceil(initialInvest / 100 * initialQuote)
+                print(currentDate.isoformat(), "Initial",
+                      row['ISIN'], initialValue)
                 transactions.append(createTransaction(
-                    item=row, value=row['Rate'], pointInTime=currentDate))
-                time.sleep(0.5)
+                    item=row, value=initialValue, pointInTime=currentDate))
 
-                daysInMonth = calendar.monthrange(
-                    currentDate.year, currentDate.month)[1]
-                currentDate = currentDate + timedelta(days=daysInMonth)
+            monthlyQuote = float(row['MonthlyQuote'])
+            if (monthlyInvest > 0 and monthlyQuote > 0):
+                monthlyValue = math.ceil(monthlyInvest / 100 * monthlyQuote)
+                while (currentDate < date.today()):
+                    print(currentDate.isoformat(), "Monthly",
+                          row['ISIN'], monthlyValue)
+                    transactions.append(createTransaction(
+                        item=row, value=monthlyValue, pointInTime=currentDate))
+                    time.sleep(0.5)
 
-with open('transactions.csv', 'w', encoding='utf-8', newline='\n') as transactionFile:
-    fieldnames = [
-        'Datum',
-        'Typ',
-        'Wert',
-        'Buchungswährung',
-        'Bruttobetrag',
-        'Währung Bruttobetrag',
-        'Wechselkurs',
-        'Gebühren',
-        'Steuern',
-        'Stück',
-        'ISIN',
-        'WKN',
-        'Ticker-Symbol',
-        'Wertpapiername'
-    ]
+                    daysInMonth = calendar.monthrange(
+                        currentDate.year, currentDate.month)[1]
+                    currentDate = currentDate + timedelta(days=daysInMonth)
 
-    writer = csv.DictWriter(
-        transactionFile, fieldnames=fieldnames, delimiter=";", lineterminator='\n')
-    writer.writeheader()
-    writer.writerows(transactions)
+    with open(transactionsFileName, 'w', encoding='utf-8', newline='\n') as transactionFile:
+        fieldnames = [
+            'Datum',
+            'Typ',
+            'Wert',
+            'Buchungswährung',
+            'Bruttobetrag',
+            'Währung Bruttobetrag',
+            'Wechselkurs',
+            'Gebühren',
+            'Steuern',
+            'Stück',
+            'ISIN',
+            'WKN',
+            'Ticker-Symbol',
+            'Wertpapiername'
+        ]
+
+        writer = csv.DictWriter(
+            transactionFile, fieldnames=fieldnames, delimiter=";", lineterminator='\n')
+        writer.writeheader()
+        writer.writerows(transactions)
+
+
+def main(argv):
+    positionsFileName = ''
+    transactionsFileName = 'transactions.csv'
+    initialInvest = None
+    monthlyInvest = None
+    try:
+        opts, args = getopt.getopt(
+            argv, "p:t:i:m:", ["pfile=", "tfile=", "initial=", "monthly="])
+    except getopt.GetoptError:
+        print('Wrong params')
+        sys.exit(2)
+    for opt, arg in opts:
+        if opt in ("-p", "--pfile"):
+            positionsFileName = arg
+        elif opt in ("-t", "--tfile"):
+            transactionsFileName = arg
+        elif opt in ("-i", "--initial"):
+            initialInvest = float(arg)
+        elif opt in ("-m", "--monthly"):
+            monthlyInvest = float(arg)
+
+    generateTransactions(
+        positionsFileName, transactionsFileName, initialInvest, monthlyInvest)
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
