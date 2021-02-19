@@ -10,7 +10,7 @@
 Add positions into positions.csv (use positions_template.csv)
 
 ```sh
-API_TOKEN=<token> make run
+API_TOKEN=<token> make run TRANSACTIONS_FILE="<path to generated transactions.csv>" POSITIONS_FILE="<path to input portfolio.csv>" INITIAL_INVEST=<invest in euro> MONTHLY_INVEST=<invest in euro>
 ```
 
 Upload transactions.csv into a new tresore.one portfolio
