@@ -12,7 +12,7 @@ import math
 import sys
 import getopt
 
-locale.setlocale(locale.LC_ALL, 'de_DE')
+locale.setlocale(locale.LC_ALL, 'de_DE.UTF8')
 
 apiToken = os.getenv('API_TOKEN')
 
@@ -66,7 +66,7 @@ def generateTransactions(positionsFileName, transactionsFileName, initialInvest,
             currentDate = date.fromisoformat(row['Start'])
 
             initialQuote = float(row['InitialQuota'])
-            if (initialInvest > 0 and initialQuote > 0):
+            if (initialInvest != None and initialInvest > 0 and initialQuote > 0):
                 initialValue = math.ceil(initialInvest / 100 * initialQuote)
                 print(currentDate.isoformat(), "Initial",
                       row['ISIN'], initialValue)
@@ -74,7 +74,7 @@ def generateTransactions(positionsFileName, transactionsFileName, initialInvest,
                     item=row, value=initialValue, pointInTime=currentDate))
 
             monthlyQuote = float(row['MonthlyQuote'])
-            if (monthlyInvest > 0 and monthlyQuote > 0):
+            if (monthlyInvest != None and monthlyInvest > 0 and monthlyQuote > 0):
                 monthlyValue = math.ceil(monthlyInvest / 100 * monthlyQuote)
                 while (currentDate < date.today()):
                     print(currentDate.isoformat(), "Monthly",
