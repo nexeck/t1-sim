@@ -1,5 +1,9 @@
 # Tresore.one Sparplan Simulator
 
+### **Never hand out your API Token**
+
+It has the same power then your username/password
+
 ## Requirements
 
 - pipenv
